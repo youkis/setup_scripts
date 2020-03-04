@@ -1,11 +1,6 @@
-# static ip
-isStaticIP=false
-IFACE=eth0
-IP_ADDR=192.168.36.109
 #Specify OpenCV version
 isOpenCV=false
 cvVersion="3.4.4"
-isNFS=false
 
 #old kernel installation
 #apt install linux-image-4.4.0-171-generic
@@ -17,27 +12,6 @@ isNFS=false
 apt update
 apt install -y openssh-server git curl tmux gcc g++ cmake clang wget
 systemctl enable ssh
-
-# static ip
-if "${isStaticIP}"; then
-cat <<EOF > /etc/network/interfaces
-# interfaces(5) file used by ifup(8) and ifdown(8)
-auto lo
-iface lo inet loopback
-
-auto $IFACE
-    iface $IFACE inet static
-    address $IP_ADDR
-    netmask 255.255.254.0
-    gateway 192.168.36.1
-    dns-nameservers 192.168.36.1
-EOF
-fi
-echo -e 'DNS=192.168.36.1\nDomains=eda.ict.e.titech.ac.jp' >> /etc/systemd/resolved.conf
-systemctl enable systemd-resolved
-systemctl restart systemd-resolved
-unlink  /etc/resolv.conf
-ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf
 
 cd
 git clone https://github.com/youkis/dotfiles
@@ -133,14 +107,6 @@ echo '
 __pycache__
 *.py[cod]
 *.out' > .gitignore_global
-
-if "${isNFS}"; then
-	apt-get -y install nfs-common autofs
-	echo '/-    /etc/auto.mount' >> /etc/auto.master
-	mkdir /exLab
-	echo '/exLab -fstype=nfs,rw saturn.eda.ict.e.titech.ac.jp:/exhome/sada/Lab' > /etc/auto.mount
-	systemctl enable autofs
-	systemctl restart autofs
 
 # kvm case
 #echo '@reboot mount -t 9p -o trans=virtio work /work'|crontab -u root -
